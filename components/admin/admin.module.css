@@ -665,6 +665,10 @@
   border-top: 1px solid #efe6cc;
   vertical-align: middle;
 }
+.table td:first-child,
+.table td:nth-child(2) {
+  white-space: nowrap;
+}
 .table .r {
   text-align: right;
   font-variant-numeric: tabular-nums;

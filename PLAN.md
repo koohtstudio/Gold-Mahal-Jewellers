@@ -234,3 +234,16 @@ Nothing is applied to any Neon project during this build unless you say so (open
 ## 17. Definition of done
 
 Deployed Vercel URL, short summary, Lighthouse numbers, open items from `docs/CONTENT_TODO.md`, and an honest list of what I could not do. Switching to `live` is then env vars plus filling in `lib/repo/neon/`.
+
+
+## Build notes (added after "go")
+
+What was decided or changed while building. The plan above is otherwise what was built.
+
+- **Demo mode added** (`NEXT_PUBLIC_APP_MODE=demo`) so the phone to laptop story works across devices. It keeps the same screens and the same operations code as mock mode, but the one JSON document lives in a Neon row per room (`demo_rooms`) behind `/api/demo/doc`, with optimistic concurrency and 1.2 second polling. It is a sample data sandbox with no sign in. The relational schema stays written and not applied.
+- **Neon replaces Supabase** everywhere: `db/migrations/0001_init.sql` (tables, `v_shop_pieces`, `create_reservation`, `mark_reservation_sold`, `expire_holds`, `reveal_old_gold_id`, RLS and column privileges) was tested on a throwaway local Postgres with `scripts/check-migration.sh`.
+- **Zod loads on first write**, not at page start, to keep startup JavaScript small. Reads use a quick shape check. Writes are fully validated.
+- **Hold rule**: a hold ends at the later of the hold hours and the end of the visit window.
+- **Branching**: work is on `build/v1` with a PR into `main`. Production on Vercel was deployed from the CLI so the owner has a public link before the merge. `main` is untouched until the PR is merged.
+- **Two additions to the route list**: `/reservation/[code]` (customer status page) and `/policies`.
+- **Claims** are gated in `lib/content/claims.ts`, all off.
