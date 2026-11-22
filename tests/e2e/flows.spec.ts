@@ -112,7 +112,7 @@ test.describe("admin", () => {
     await expect(record).toBeDisabled();
     await expect(page.getByText("Turn on Photo ID checked to enable the payout.")).toBeVisible();
     await page.getByRole("switch", { name: "Photo ID checked and copied" }).click();
-    await page.getByLabel("ID reference").fill("Driver licence ending 4821");
+    await page.getByLabel("ID reference", { exact: true }).fill("Driver licence ending 4821");
     await expect(page.getByText(/Pays/).first()).toContainText("$1,792.33");
     await expect(record).toBeEnabled();
     await record.click();

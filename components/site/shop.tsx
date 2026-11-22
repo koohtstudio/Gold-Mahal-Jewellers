@@ -224,7 +224,9 @@ export function PieceDialog() {
   return (
     <Dialog open={!!slug} onClose={closePiece} label={piece ? `${piece.name} details` : "Piece details"}>
       <div className={`${s.mdl} cream`}>
-        <CloseButton onClick={closePiece} />
+        <div className={s.mdlClose}>
+          <CloseButton onClick={closePiece} />
+        </div>
         {piece ? (
           <>
             <div className={s.pic2}>

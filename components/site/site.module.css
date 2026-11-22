@@ -960,6 +960,15 @@
 .stack {
   display: grid;
   gap: 16px;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
+}
+.drawerBody > * {
+  min-width: 0;
+}
+.days {
+  min-width: 0;
+  max-width: 100%;
 }
 .hp {
   position: absolute;
@@ -998,10 +1007,11 @@
 }
 .mdlClose {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: 12px;
+  right: 12px;
   background: var(--cream);
   z-index: 3;
+  line-height: 0;
 }
 .sizes {
   display: flex;

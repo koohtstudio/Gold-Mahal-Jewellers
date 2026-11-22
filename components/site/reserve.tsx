@@ -301,7 +301,9 @@ export function VisitDialog() {
   return (
     <Dialog open={visit.open} onClose={closeVisit} label="Book a visit">
       <div className={`${s.mdl} ${s.mdlQ} cream`}>
-        <CloseButton onClick={closeVisit} />
+        <div className={s.mdlClose}>
+          <CloseButton onClick={closeVisit} />
+        </div>
         <VisitForm key={JSON.stringify(visit.opts)} opts={visit.opts} onClose={closeVisit} />
       </div>
     </Dialog>
