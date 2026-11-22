@@ -28,7 +28,6 @@ export function PieceCard({ piece, index }: { piece: Piece; index: number }) {
     <Link
       href={`/shop/${piece.slug}`}
       className={s.card}
-      style={{ animationDelay: `${Math.min(index, 8) * 0.05}s` }}
       onClick={(e) => {
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
         e.preventDefault();
@@ -36,7 +35,7 @@ export function PieceCard({ piece, index }: { piece: Piece; index: number }) {
       }}
     >
       <div className={s.pic}>
-        <ProductImage src={piece.image} alt={`${piece.name}`} sizes="(max-width: 899px) 50vw, 380px" priority={index < 2} />
+        <ProductImage src={piece.image} alt={`${piece.name}`} sizes="(max-width: 899px) 50vw, 380px" priority={index < 4} />
         {badge ? <em className={`${s.badge} ${status === "reserved" ? s.badgeHold : status === "sold" ? s.badgeSold : ""}`} style={{ fontStyle: "normal" }}>{badge}</em> : null}
         <u className={s.spec} style={{ textDecoration: "none" }}>{specOf(piece)}</u>
       </div>

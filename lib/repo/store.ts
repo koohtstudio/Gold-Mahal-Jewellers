@@ -11,6 +11,21 @@ export function parseDoc(raw: string | null): StoreDoc | null {
   }
 }
 
+/**
+ * A fast check used when reading. The full Zod parse runs before every write, so bad data can never be saved,
+ * and a document that fails the quick check is replaced with the seed. Skipping Zod on read keeps the page quick to start.
+ */
+export function quickParse(raw: string | null): StoreDoc | null {
+  if (!raw) return null;
+  try {
+    const d = JSON.parse(raw) as Partial<StoreDoc> | null;
+    if (!d || d.version !== 1 || !Array.isArray(d.rates) || !Array.isArray(d.pieces) || !Array.isArray(d.reservations) || !Array.isArray(d.ledger) || !d.settings || !d.counters || !d.accountant) return null;
+    return d as StoreDoc;
+  } catch {
+    return null;
+  }
+}
+
 /** Holds the latest document in memory, runs transactions through the backend and tells listeners when anything changes. */
 export class Store {
   private doc: StoreDoc | null = null;
@@ -28,13 +43,13 @@ export class Store {
     if (!this.initP) {
       this.initP = (async () => {
         const raw = await this.backend.load();
-        let doc = parseDoc(raw);
+        let doc = quickParse(raw);
         let recovered = false;
         if (!doc) {
           // Nothing stored, an old version, or corrupt data. Reseed through a transaction so another tab does not race us.
           recovered = raw !== null;
-          const next = await this.backend.transact((cur) => (parseDoc(cur) ? (cur as string) : JSON.stringify(this.seed())), this.origin);
-          doc = parseDoc(next);
+          const next = await this.backend.transact((cur) => (quickParse(cur) ? (cur as string) : JSON.stringify(this.seed())), this.origin);
+          doc = quickParse(next);
         }
         this.doc = doc;
         this.off = this.backend.onExternalChange(() => void this.reload(), this.origin);
@@ -50,7 +65,7 @@ export class Store {
   }
 
   private async reload() {
-    const doc = parseDoc(await this.backend.load());
+    const doc = quickParse(await this.backend.load());
     if (doc) {
       this.doc = doc;
       this.notify();
