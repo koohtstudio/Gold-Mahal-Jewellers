@@ -1,0 +1,171 @@
+:root {
+  --velvet: #14100c;
+  --velvet-deep: #0c0a07;
+  --velvet-panel: #1b1610;
+  --velvet-mid: #2a2218;
+  --gold: #d4af5f;
+  --gold-light: #f0d58a;
+  --gold-bright: #ebcb78;
+  /* The only gold that is allowed as text on cream. */
+  --gold-dark: #8a6414;
+  --cream: #f6efdf;
+  --paper: #ffffff;
+  --line: #dccfb0;
+  --ink: #2a2014;
+  --muted: #6b5d45;
+  --muted-dark: #bdb19a;
+  --muted-faint: #9e927c;
+  --rule-dark: #3a2e1a;
+  --border-field: #cdbf9f;
+  --good: #1f6b45;
+  --text-on-dark: #ede3cc;
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-body: var(--font-jost), "Jost", system-ui, sans-serif;
+  --gold-gradient: linear-gradient(100deg, #b8892b 0%, #f4dc95 38%, #d4af5f 55%, #9c7120 100%);
+  --gold-button: linear-gradient(100deg, #c79a38, #ebcb78 50%, #c79a38);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--velvet);
+  color: var(--text-on-dark);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-light);
+  outline-offset: 3px;
+}
+
+.on-cream :focus-visible,
+.cream :focus-visible {
+  outline-color: var(--velvet);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -80px;
+  z-index: 200;
+  background: var(--gold);
+  color: var(--velvet);
+  padding: 12px 18px;
+  font-weight: 500;
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+html.lock {
+  overflow: hidden;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Section tones. Shared components read these so one Button or Chip works on both. */
+:root,
+.dark {
+  --btn-line: var(--gold);
+  --btn-line-text: var(--gold-bright);
+  --btn-line-hover-text: var(--velvet);
+  --eyebrow: var(--gold);
+  --lead: var(--muted-dark);
+  --em: var(--gold);
+  --label: var(--muted-faint);
+  --chip-bg: transparent;
+  --chip-border: #4a3d26;
+  --chip-text: #d9cdb3;
+  --chip-hover: var(--gold);
+  --chip-on-bg: var(--gold);
+  --chip-on-text: var(--velvet);
+  --stepper-bg: transparent;
+  --stepper-btn: var(--gold-light);
+  --stepper-hover: var(--velvet-mid);
+  --note: #8f826a;
+}
+.cream {
+  background: var(--cream);
+  color: var(--ink);
+  --btn-line: var(--ink);
+  --btn-line-text: var(--ink);
+  --btn-line-hover-text: var(--cream);
+  --eyebrow: var(--gold-dark);
+  --lead: var(--muted);
+  --em: var(--gold-dark);
+  --label: var(--muted);
+  --chip-bg: #fff;
+  --chip-border: var(--border-field);
+  --chip-text: var(--ink);
+  --chip-hover: var(--ink);
+  --chip-on-bg: var(--velvet);
+  --chip-on-text: var(--gold-light);
+  --stepper-bg: #fff;
+  --stepper-btn: var(--ink);
+  --stepper-hover: #f0e6cc;
+  --note: var(--muted);
+}
