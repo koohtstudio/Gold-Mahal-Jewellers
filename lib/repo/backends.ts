@@ -111,6 +111,7 @@ export class RemoteBackend implements DocBackend {
     } catch {
       this.channel = null;
     }
+    (this.channel as unknown as { unref?: () => void } | null)?.unref?.();
   }
   private url(extra = "") {
     return `/api/demo/doc?room=${encodeURIComponent(this.room())}${extra}`;
@@ -172,8 +173,10 @@ export class RemoteBackend implements DocBackend {
       }
       const hidden = typeof document !== "undefined" && document.visibilityState === "hidden";
       timer = setTimeout(tick, hidden ? this.pollMs * 4 : this.pollMs);
+      (timer as unknown as { unref?: () => void }).unref?.();
     };
     timer = setTimeout(tick, this.pollMs);
+    (timer as unknown as { unref?: () => void }).unref?.();
     return () => {
       stopped = true;
       if (timer) clearTimeout(timer);

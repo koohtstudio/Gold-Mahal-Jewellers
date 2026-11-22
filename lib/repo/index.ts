@@ -40,7 +40,8 @@ export function getRepo(): Repo {
   if (config.mode === "live") {
     cached = createNeonRepo();
   } else if (config.mode === "demo") {
-    cached = createRepo({ mode: "demo", backend: new RemoteBackend(currentRoom), seed: buildSeed, auth: createCookieAuth(), storage: createIndexedDbStorage(), latency: null, tick: true });
+    const room = currentRoom();
+    cached = createRepo({ mode: "demo", backend: new RemoteBackend(() => room), seed: buildSeed, auth: createCookieAuth(), storage: createIndexedDbStorage(), latency: null, tick: true });
   } else {
     cached = createRepo({ mode: "mock", backend: new LocalBackend(STORE_KEY), seed: buildSeed, auth: createCookieAuth(), storage: createIndexedDbStorage(), latency: config.latency, tick: true });
   }
