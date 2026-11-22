@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { DomainError } from "@/lib/domain/errors";
+import { CATEGORIES } from "@/lib/domain/constants";
 import type { Karat } from "@/lib/domain/schemas";
-import { CATEGORIES } from "@/lib/domain/schemas";
 import { repo, useRate, useRateHistory, useSession, useSettings } from "@/lib/hooks";
 import type { RateFeedSuggestion } from "@/lib/repo/types";
 import { allRates, money, parseCents } from "@/lib/pricing";

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { MemoryBackend } from "@/lib/repo/backends";
 import { makeHarness } from "@/lib/repo/testing";
-import { parseDoc } from "@/lib/repo/store";
+import { parseDoc } from "@/lib/repo/validate";
 import { buildSeed } from "@/lib/mock/seed";
 import { StoreDocSchema } from "@/lib/domain/schemas";
 import { zonedToDate } from "@/lib/time";

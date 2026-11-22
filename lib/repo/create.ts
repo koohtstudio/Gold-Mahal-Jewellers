@@ -1,15 +1,12 @@
 import { DomainError } from "@/lib/domain/errors";
-import {
-  AccountantSettingsSchema, NewExpenseInputSchema, NewJobInputSchema, NewLayawayInputSchema, NewOldGoldInputSchema, NewPieceInputSchema, ReserveInputSchema, SettingsSchema,
-  ValuationInputSchema, VisitInputSchema, type StoreDoc,
-} from "@/lib/domain/schemas";
+import type { Settings, StoreDoc } from "@/lib/domain/schemas";
 import { RateLimiter, judgeSubmission, lastFour } from "@/lib/guards";
 import { inPeriod, periodsFor } from "@/lib/time";
 import type { z } from "zod";
 import type { DocBackend } from "./backends";
 import * as ops from "./ops";
 import { payAtStore, sampleRateFeed } from "./ports";
-import { Store, parseDoc } from "./store";
+import { Store } from "./store";
 import type { AccountantPort, AppMode, AuthPort, Repo, StoragePort } from "./types";
 
 export interface CreateRepoOptions {
@@ -26,8 +23,13 @@ export interface CreateRepoOptions {
   tick?: boolean;
 }
 
-function parse<T extends z.ZodType>(schema: T, input: unknown): z.infer<T> {
-  const r = schema.safeParse(input);
+type SchemaMod = typeof import("@/lib/domain/schemas");
+let schemaMod: Promise<SchemaMod> | null = null;
+
+/** Zod is loaded on the first write, not when the page starts. */
+async function check<S extends z.ZodType>(pick: (m: SchemaMod) => S, input: unknown): Promise<z.infer<S>> {
+  const m = await (schemaMod ??= import("@/lib/domain/schemas"));
+  const r = pick(m).safeParse(input);
   if (!r.success) {
     const issue = r.error.issues[0];
     const where = issue && issue.path.length ? ` (${issue.path.join(".")})` : "";
@@ -81,13 +83,15 @@ export function createRepo(o: CreateRepoOptions): Repo {
 
   const accountant: AccountantPort = {
     settings: () => read((d, c) => (ops.requireOwner(c), d.accountant)),
-    update: (patch) =>
-      write((d, c) => {
+    async update(patch) {
+      const v = await check((m) => m.AccountantSettingsSchema.partial().strict(), patch);
+      return write((d, c) => {
         ops.requireOwner(c);
-        d.accountant = { ...d.accountant, ...parse(AccountantSettingsSchema.partial().strict(), patch) };
+        d.accountant = { ...d.accountant, ...v };
         ops.audit(d, c, "accountant.update", d.accountant.email);
         return d.accountant;
-      }),
+      });
+    },
     history: () => read((d, c) => (ops.requireOwner(c), d.sendLog)),
     send: (period, format) => write((d, c) => ops.sendToAccountant(d, c, period, format)),
   };
@@ -120,13 +124,16 @@ export function createRepo(o: CreateRepoOptions): Repo {
           return opts?.includeHidden ? d.pieces : d.pieces.filter((p) => p.visible);
         }),
       bySlug: (slug) => read((d, c) => d.pieces.find((p) => p.slug === slug && (p.visible || c.session)) ?? null),
-      add: (input) => write((d, c) => ops.addPiece(d, c, parse(NewPieceInputSchema, input))),
+      async add(input) {
+        const v = await check((m) => m.NewPieceInputSchema, input);
+        return write((d, c) => ops.addPiece(d, c, v));
+      },
       update: (id, patch) => write((d, c) => ops.updatePiece(d, c, id, patch)),
       sellAtCounter: (id, input) => write((d, c) => ops.sellAtCounter(d, c, id, input)),
     },
     reservations: {
       async create(raw) {
-        const input = parse(ReserveInputSchema, raw);
+        const input = await check((m) => m.ReserveInputSchema, raw);
         const { _hp, _t, ...clean } = input;
         if (!guard(reserveLimit, _hp, _t)) {
           // A bot filled the hidden field. Pretend it worked, store nothing.
@@ -154,41 +161,56 @@ export function createRepo(o: CreateRepoOptions): Repo {
     },
     jobs: {
       list: () => read((d, c) => (ops.requireStaff(c), d.jobs)),
-      add: (input) => write((d, c) => ops.addJob(d, c, parse(NewJobInputSchema, input))),
+      async add(input) {
+        const v = await check((m) => m.NewJobInputSchema, input);
+        return write((d, c) => ops.addJob(d, c, v));
+      },
       advance: (id) => write((d, c) => ops.advanceJob(d, c, id)),
       collectBalance: (id) => write((d, c) => ops.collectBalance(d, c, id)),
     },
     oldGold: {
       list: () => read((d, c) => (ops.requireStaff(c), d.oldGold.map(ops.maskOldGold))),
-      add: (input) => write((d, c) => ops.maskOldGold(ops.addOldGold(d, c, parse(NewOldGoldInputSchema, input)))),
+      async add(input) {
+        const v = await check((m) => m.NewOldGoldInputSchema, input);
+        return write((d, c) => ops.maskOldGold(ops.addOldGold(d, c, v)));
+      },
       markMelted: (id) => write((d, c) => ops.maskOldGold(ops.markMelted(d, c, id))),
       revealId: (id) => write((d, c) => ops.revealOldGoldId(d, c, id)),
     },
     layaway: {
       list: () => read((d, c) => (ops.requireStaff(c), d.layaway)),
-      add: (input) => write((d, c) => ops.addLayaway(d, c, parse(NewLayawayInputSchema, input))),
+      async add(input) {
+        const v = await check((m) => m.NewLayawayInputSchema, input);
+        return write((d, c) => ops.addLayaway(d, c, v));
+      },
       recordPayment: (id, amt) => write((d, c) => ops.recordLayawayPayment(d, c, id, amt)),
     },
     books: {
       periods: () => periodsFor(now()),
       ledger: (p) => read((d, c) => (ops.requireOwner(c), d.ledger.filter((e) => inPeriod(e.date, p)))),
       expenses: (p) => read((d, c) => (ops.requireOwner(c), d.expenses.filter((e) => inPeriod(e.date, p)))),
-      addExpense: (input) => write((d, c) => ops.addExpense(d, c, parse(NewExpenseInputSchema, input))),
+      async addExpense(input) {
+        const v = await check((m) => m.NewExpenseInputSchema, input);
+        return write((d, c) => ops.addExpense(d, c, v));
+      },
       logExport: (kind, period) => write((d, c) => ops.logExport(d, c, kind, period)),
     },
     settings: {
       get: () => read((d) => d.settings),
-      update: (patch) => write((d, c) => ops.updateSettings(d, c, parse(SettingsSchema.partial().strict(), patch))),
+      async update(patch) {
+        const v = await check((m) => m.SettingsSchema.partial().strict(), patch);
+        return write((d, c) => ops.updateSettings(d, c, v as Partial<Settings>));
+      },
     },
     visits: {
       async addVisit(raw) {
-        const input = parse(VisitInputSchema, raw);
+        const input = await check((m) => m.VisitInputSchema, raw);
         const { _hp, _t, ...clean } = input;
         if (!guard(requestLimit, _hp, _t)) return { id: "vr-0", createdAt: now().toISOString(), type: clean.type, preferredDate: clean.preferredDate, name: clean.name, phone: clean.phone, status: "new" };
         return write((d, c) => ops.addVisit(d, c, clean));
       },
       async addValuation(raw) {
-        const input = parse(ValuationInputSchema, raw);
+        const input = await check((m) => m.ValuationInputSchema, raw);
         const { _hp, _t, ...clean } = input;
         if (!guard(requestLimit, _hp, _t)) return { id: "val-0", createdAt: now().toISOString(), karat: clean.karat, gramsMilli: clean.gramsMilli, estimateCents: 0, name: clean.name, phone: clean.phone, preferredDate: clean.preferredDate, status: "new" };
         return write((d, c) => ops.addValuation(d, c, clean));
@@ -216,4 +238,3 @@ export function createRepo(o: CreateRepoOptions): Repo {
   return repo;
 }
 
-export { parseDoc };

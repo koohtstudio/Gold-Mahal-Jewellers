@@ -1,5 +1,5 @@
+import { KARATS } from "@/lib/domain/constants";
 import type { Expense, Karat, LedgerEntry, LedgerSource, OldGoldPurchase } from "@/lib/domain/schemas";
-import { KARATS } from "@/lib/domain/schemas";
 import { inPeriod, type Period } from "@/lib/time";
 
 export const DISCLAIMER = "A working summary for the accountant. It is not tax advice. Please confirm treatment of bullion, trade-ins and layaway with your accountant.";

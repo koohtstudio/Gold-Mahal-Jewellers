@@ -1,4 +1,5 @@
-import { DAYS, type DayKey, type Settings } from "@/lib/domain/schemas";
+import { DAYS } from "@/lib/domain/constants";
+import type { DayKey, Settings } from "@/lib/domain/schemas";
 
 /** The shop is in Brampton, Ontario. All calendar logic uses this zone, whatever the visitor's device says. */
 export const SHOP_TZ = "America/Toronto";

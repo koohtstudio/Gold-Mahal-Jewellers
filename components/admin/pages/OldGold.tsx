@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { Pill } from "@/components/ui";
-import { KARATS, type Karat } from "@/lib/domain/schemas";
+import { KARATS } from "@/lib/domain/constants";
+import type { Karat } from "@/lib/domain/schemas";
 import { repo, useOldGold, useSession } from "@/lib/hooks";
 import { usePricing } from "@/lib/hooks/pricing";
 import { grams, money, parseMilli, tradeInValue } from "@/lib/pricing";

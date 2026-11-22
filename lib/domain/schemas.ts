@@ -1,12 +1,13 @@
 import { z } from "zod";
+import { CATEGORIES, DAYS, EXPENSE_CATEGORIES, KARATS, STORE_VERSION } from "./constants";
+
+export { CATEGORIES, DAYS, EXPENSE_CATEGORIES, KARATS, STORE_VERSION };
 
 /** Domain types and Zod schemas. Money is integer cents. Weight is integer milligrams. Rates in cents per gram. */
 
-export const KARATS = [24, 22, 18, 14] as const;
 export const KaratSchema = z.union([z.literal(24), z.literal(22), z.literal(18), z.literal(14)]);
 export type Karat = z.infer<typeof KaratSchema>;
 
-export const CATEGORIES = ["Earrings", "Chains", "Bridal", "Diamonds", "Bars"] as const;
 export const CategorySchema = z.enum(CATEGORIES);
 export type Category = z.infer<typeof CategorySchema>;
 
@@ -154,7 +155,6 @@ export const LedgerEntrySchema = z.object({
 });
 export type LedgerEntry = z.infer<typeof LedgerEntrySchema>;
 
-export const EXPENSE_CATEGORIES = ["Gold purchase", "Diamonds and stones", "Rent", "Insurance", "Packaging", "Advertising", "Other"] as const;
 export const ExpenseCategorySchema = z.enum(EXPENSE_CATEGORIES);
 export type ExpenseCategory = z.infer<typeof ExpenseCategorySchema>;
 export const ExpenseSchema = z.object({
@@ -192,7 +192,6 @@ export const SendLogSchema = z.object({
 });
 export type SendLog = z.infer<typeof SendLogSchema>;
 
-export const DAYS = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 export type DayKey = (typeof DAYS)[number];
 const HoursSchema = z.object({ open: z.number().int().min(0).max(1440), close: z.number().int().min(0).max(1440) }).nullable();
 export const SettingsSchema = z.object({
@@ -257,7 +256,6 @@ export type Role = z.infer<typeof RoleSchema>;
 export const SessionSchema = z.object({ role: RoleSchema, email: z.string() });
 export type Session = z.infer<typeof SessionSchema>;
 
-export const STORE_VERSION = 1 as const;
 export const StoreDocSchema = z.object({
   version: z.literal(STORE_VERSION),
   createdAt: isoDateTime,

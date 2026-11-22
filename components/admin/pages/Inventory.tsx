@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { CloseButton, Dialog, Pill, ProductImage } from "@/components/ui";
-import { CATEGORIES, type Category, type Karat, type Piece } from "@/lib/domain/schemas";
+import { CATEGORIES } from "@/lib/domain/constants";
+import type { Category, Karat, Piece } from "@/lib/domain/schemas";
 import { repo, useAllPieces } from "@/lib/hooks";
 import { usePricing } from "@/lib/hooks/pricing";
 import { availableUnits, grams, hstOn, money, parseCents, parseMilli, pieceStatus } from "@/lib/pricing";

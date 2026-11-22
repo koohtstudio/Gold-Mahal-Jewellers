@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Button, Chip, Chips, CloseButton, Confirm, Dialog, Eyebrow, Heading, Label, LinkButton, Note, ProductImage, StateBlock } from "@/components/ui";
-import { CATEGORIES, type Piece } from "@/lib/domain/schemas";
+import { CATEGORIES } from "@/lib/domain/constants";
+import type { Piece } from "@/lib/domain/schemas";
 import { usePieces, usePiece } from "@/lib/hooks";
 import { bag, useBag } from "@/lib/hooks/bag";
 import { usePricing } from "@/lib/hooks/pricing";

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo } from "react";
-import { KARATS } from "@/lib/domain/schemas";
+import { KARATS } from "@/lib/domain/constants";
 import { buildBooks, salesByDay } from "@/lib/books/summary";
 import { useAllPieces, useExpenses, useJobs, useLayaway, useLedger, useRate, useReservations, useSession, useValuations, useVisits } from "@/lib/hooks";
 import { usePricing } from "@/lib/hooks/pricing";

@@ -1,15 +1,9 @@
-import { StoreDocSchema, type StoreDoc } from "@/lib/domain/schemas";
+import type { StoreDoc } from "@/lib/domain/schemas";
 import type { DocBackend } from "./backends";
 
-export function parseDoc(raw: string | null): StoreDoc | null {
-  if (!raw) return null;
-  try {
-    const r = StoreDocSchema.safeParse(JSON.parse(raw));
-    return r.success ? r.data : null;
-  } catch {
-    return null;
-  }
-}
+type Validate = typeof import("./validate");
+let validateMod: Promise<Validate> | null = null;
+const loadValidate = () => (validateMod ??= import("./validate"));
 
 /**
  * A fast check used when reading. The full Zod parse runs before every write, so bad data can never be saved,
@@ -74,12 +68,13 @@ export class Store {
 
   async transact<T>(fn: (doc: StoreDoc) => T): Promise<T> {
     await this.ready();
+    const v = await loadValidate();
     let result!: T;
     let final: StoreDoc | null = null;
     await this.backend.transact((raw) => {
-      const doc = parseDoc(raw) ?? this.seed();
+      const doc = v.parseDoc(raw) ?? this.seed();
       result = fn(doc);
-      const check = StoreDocSchema.safeParse(doc);
+      const check = v.StoreDocSchema.safeParse(doc);
       if (!check.success) throw new Error(`Refusing to save an invalid document: ${check.error.issues[0]?.path.join(".")} ${check.error.issues[0]?.message}`);
       final = doc;
       return JSON.stringify(doc);
